@@ -7,18 +7,37 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from paddleocr import PaddleOCR
 
-# 2.3版本可用
-# paddleocr.paddleocr.BASE_DIR = "./"
-MODEL_CACHE ="./paddleocr"
-japOcr = PaddleOCR(ocr_version="PP-OCRv5", use_doc_unwarping=False, use_textline_orientation=False, lang="japan",
+japOcr = PaddleOCR(text_detection_model_dir="../models/PP-OCRv5_server_det",
+                   text_recognition_model_dir="../models/PP-OCRv5_server_rec",
+                   text_recognition_model_name="PP-OCRv5_server_rec",
+                   text_detection_model_name="PP-OCRv5_server_det",
+                   lang="japan",
                    enable_mkldnn=True)
-engOcr = PaddleOCR(ocr_version="PP-OCRv5", use_doc_unwarping=False, use_textline_orientation=False, lang="en",
+
+engOcr = PaddleOCR(text_detection_model_dir="../models/PP-OCRv5_server_det",
+                   text_recognition_model_dir="../models/PP-OCRv5_server_rec",
+                   text_recognition_model_name="PP-OCRv5_server_rec",
+                   text_detection_model_name="PP-OCRv5_server_det",
+                   lang="en",
                    enable_mkldnn=True)
-korOcr = PaddleOCR(ocr_version="PP-OCRv5", use_doc_unwarping=False, use_textline_orientation=False, lang="korean",
+
+korOcr = PaddleOCR(text_detection_model_dir="../models/PP-OCRv5_server_det",
+                   text_recognition_model_dir="../models/korean_PP-OCRv5_mobile_rec",
+                   text_recognition_model_name="korean_PP-OCRv5_mobile_rec",
+                   text_detection_model_name="PP-OCRv5_server_det",
+                   lang="korean",
                    enable_mkldnn=True)
-ruOcr = PaddleOCR(ocr_version="PP-OCRv5", use_doc_unwarping=False, use_textline_orientation=False, lang="ru",
+ruOcr = PaddleOCR(text_detection_model_dir="../models/PP-OCRv5_server_det",
+                  text_recognition_model_dir="../models/eslav_PP-OCRv5_mobile_rec",
+                  text_recognition_model_name="eslav_PP-OCRv5_mobile_rec",
+                  text_detection_model_name="PP-OCRv5_server_det",
+                  lang="ru",
                   enable_mkldnn=True)
-zhOcr = PaddleOCR(ocr_version="PP-OCRv5", use_doc_unwarping=False, use_textline_orientation=False, lang="ch",
+zhOcr = PaddleOCR(text_detection_model_dir="../models/PP-OCRv5_server_det",
+                  text_recognition_model_dir="../models/PP-OCRv5_server_rec",
+                  text_recognition_model_name="PP-OCRv5_server_rec",
+                  text_detection_model_name="PP-OCRv5_server_det",
+                  lang="ch",
                   enable_mkldnn=True)
 
 app = FastAPI()
@@ -110,17 +129,17 @@ def ocrResultSort(ocr_result):
 # ocr解析
 def ocrProcess(imgPath, language):
     if language == "JAP":
-        result = japOcr.ocr(imgPath,use_doc_unwarping=False,use_textline_orientation=False)
+        result = japOcr.ocr(imgPath, use_doc_unwarping=False, use_textline_orientation=False)
     elif language == "ENG":
-        result = engOcr.ocr(imgPath,use_doc_unwarping=False,use_textline_orientation=False)
+        result = engOcr.ocr(imgPath, use_doc_unwarping=False, use_textline_orientation=False)
     elif language == "KOR":
-        result = korOcr.ocr(imgPath,use_doc_unwarping=False,use_textline_orientation=False)
+        result = korOcr.ocr(imgPath, use_doc_unwarping=False, use_textline_orientation=False)
     elif language == "RU":
-        result = ruOcr.ocr(imgPath,use_doc_unwarping=False,use_textline_orientation=False)
+        result = ruOcr.ocr(imgPath, use_doc_unwarping=False, use_textline_orientation=False)
     elif language == "ZH":
-        result = zhOcr.ocr(imgPath,use_doc_unwarping=False,use_textline_orientation=False)
+        result = zhOcr.ocr(imgPath, use_doc_unwarping=False, use_textline_orientation=False)
     else:
-        result = japOcr.ocr(imgPath,use_doc_unwarping=False,use_textline_orientation=False)
+        result = japOcr.ocr(imgPath, use_doc_unwarping=False, use_textline_orientation=False)
 
     resMapList = []
 
