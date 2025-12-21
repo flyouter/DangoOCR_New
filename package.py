@@ -39,7 +39,8 @@ if args.icon:
 # 必要的依赖收集
 cmd += [
     "--collect-data", "paddlex",
-    "--collect-all", "paddle"
+    "--collect-all", "paddle",
+    "--add-data", "models:models"
 ]
 
 # NVIDIA 支持（仅 Linux 有效）

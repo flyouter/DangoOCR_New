@@ -34,8 +34,8 @@ def create_ocr_instance(lang, det_model_name, rec_model_name):
     rec_model_dir = os.path.join(base_model_dir, rec_model_name)
 
     # 模型目录存在，使用本地模型
-    print(f"基础目录: {base_dir}")
-    print(f"模型目录: {base_model_dir}")
+    # print(f"基础目录: {base_dir}")
+    # print(f"模型目录: {base_model_dir}")
     print(f"使用本地模型: {det_model_dir}, {rec_model_dir}")
     return PaddleOCR(
         text_detection_model_dir=det_model_dir,
