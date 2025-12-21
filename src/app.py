@@ -1,5 +1,6 @@
 import argparse
 import os
+import sys
 import uuid
 from traceback import print_exc
 
@@ -8,16 +9,33 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from paddleocr import PaddleOCR
 
+def get_base_dir():
+    """获取基础目录，兼容开发环境和打包环境"""
+    if getattr(sys, 'frozen', False):
+        # 打包后的环境，使用临时解压目录
+        base_path = sys._MEIPASS
+    else:
+        # 开发环境，使用项目根目录
+        # 注意：在打包后的环境中，__file__可能不可用
+        try:
+            base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        except:
+            base_path = os.getcwd()
+    return base_path
+
 def create_ocr_instance(lang, det_model_name, rec_model_name):
     """
     创建OCR实例，如果模型目录不存在则自动下载到models目录
     """
-    # 定义模型目录路径
-    base_model_dir = "../models"
+    # 获取基础目录
+    base_dir = get_base_dir()
+    base_model_dir = os.path.join(base_dir, "models")
     det_model_dir = os.path.join(base_model_dir, det_model_name)
     rec_model_dir = os.path.join(base_model_dir, rec_model_name)
 
     # 模型目录存在，使用本地模型
+    print(f"基础目录: {base_dir}")
+    print(f"模型目录: {base_model_dir}")
     print(f"使用本地模型: {det_model_dir}, {rec_model_dir}")
     return PaddleOCR(
         text_detection_model_dir=det_model_dir,
