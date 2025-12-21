@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from paddleocr import PaddleOCR
 
+
 def get_base_dir():
     """获取基础目录，兼容开发环境和打包环境"""
     if getattr(sys, 'frozen', False):
@@ -22,6 +23,7 @@ def get_base_dir():
         except:
             base_path = os.getcwd()
     return base_path
+
 
 def create_ocr_instance(lang, det_model_name, rec_model_name):
     """
@@ -48,6 +50,7 @@ def create_ocr_instance(lang, det_model_name, rec_model_name):
         lang=lang,
         enable_mkldnn=True
     )
+
 
 # 创建各个语言的OCR实例
 japOcr = create_ocr_instance("japan", "PP-OCRv5_server_det", "PP-OCRv5_mobile_rec")
@@ -159,86 +162,56 @@ def ocrProcess(imgPath, language):
 
     resMapList = []
 
-    # PaddleOCR 3.x版本返回结构变化处理
-    if result and len(result) > 0:
-        ocr_result = result[0]
+    ocr_result = result[0]
 
-        # 检查是否是字典结构（PaddleOCR 3.x版本）
-        if isinstance(ocr_result, dict):
-            # 从字典中提取数据
-            texts = ocr_result.get('rec_texts', [])
-            scores = ocr_result.get('rec_scores', [])
-            boxes = ocr_result.get('rec_boxes', [])
+    # 检查是否是字典结构（PaddleOCR 3.x版本）
+    if isinstance(ocr_result, dict):
+        # 从字典中提取数据
+        texts = ocr_result.get('rec_texts', [])
+        scores = ocr_result.get('rec_scores', [])
+        boxes = ocr_result.get('rec_boxes', [])
 
-            for i in range(len(texts)):
-                text = texts[i] if i < len(texts) else ""
-                score = float(scores[i]) if i < len(scores) else 0.0
+        for i in range(len(texts)):
+            text = texts[i] if i < len(texts) else ""
+            score = float(scores[i]) if i < len(scores) else 0.0
 
-                # 处理坐标框
-                coord = {
-                    "UpperLeft": [0.0, 0.0],
-                    "UpperRight": [0.0, 0.0],
-                    "LowerRight": [0.0, 0.0],
-                    "LowerLeft": [0.0, 0.0]
-                }
+            # 处理坐标框
+            coord = {
+                "UpperLeft": [0.0, 0.0],
+                "UpperRight": [0.0, 0.0],
+                "LowerRight": [0.0, 0.0],
+                "LowerLeft": [0.0, 0.0]
+            }
 
-                if i < len(boxes):
-                    box = boxes[i]
-                    # PaddleOCR 3.x版本box可能是4个整数值 [x1, y1, x2, y2]
-                    if hasattr(box, '__len__') and len(box) == 4:
-                        # 转换为4个坐标点
-                        x1, y1, x2, y2 = box
-                        coord = {
-                            "UpperLeft": [float(x1), float(y1)],
-                            "UpperRight": [float(x2), float(y1)],
-                            "LowerRight": [float(x2), float(y2)],
-                            "LowerLeft": [float(x1), float(y2)]
-                        }
-                    elif hasattr(box, 'shape') and box.shape == (4, 2):
-                        # 4x2坐标点格式
-                        coord = {
-                            "UpperLeft": [float(box[0][0]), float(box[0][1])],
-                            "UpperRight": [float(box[1][0]), float(box[1][1])],
-                            "LowerRight": [float(box[2][0]), float(box[2][1])],
-                            "LowerLeft": [float(box[3][0]), float(box[3][1])]
-                        }
+            if i < len(boxes):
+                box = boxes[i]
+                # PaddleOCR 3.x版本box可能是4个整数值 [x1, y1, x2, y2]
+                if hasattr(box, '__len__') and len(box) == 4:
+                    # 转换为4个坐标点
+                    x1, y1, x2, y2 = box
+                    coord = {
+                        "UpperLeft": [float(x1), float(y1)],
+                        "UpperRight": [float(x2), float(y1)],
+                        "LowerRight": [float(x2), float(y2)],
+                        "LowerLeft": [float(x1), float(y2)]
+                    }
+                elif hasattr(box, 'shape') and box.shape == (4, 2):
+                    # 4x2坐标点格式
+                    coord = {
+                        "UpperLeft": [float(box[0][0]), float(box[0][1])],
+                        "UpperRight": [float(box[1][0]), float(box[1][1])],
+                        "LowerRight": [float(box[2][0]), float(box[2][1])],
+                        "LowerLeft": [float(box[3][0]), float(box[3][1])]
+                    }
 
-                resMap = {
-                    "Coordinate": coord,
-                    "Words": text,
-                    "Score": score
-                }
-                resMapList.append(resMap)
-        else:
-            # 旧版本结构处理（兼容性）
-            try:
-                result = ocrResultSort(result)
-            except Exception:
-                pass
-
-            for line in result:
-                try:
-                    print(line[1][0])
-                except Exception:
-                    pass
-                # 检查line结构，防止KeyError
-                if isinstance(line, list) and len(line) >= 2:
-                    if isinstance(line[0], list) and len(line[0]) >= 4:
-                        resMap = {
-                            "Coordinate": {
-                                "UpperLeft": line[0][0],
-                                "UpperRight": line[0][1],
-                                "LowerRight": line[0][2],
-                                "LowerLeft": line[0][3]
-                            },
-                            "Words": line[1][0] if isinstance(line[1], list) and len(line[1]) >= 1 else "",
-                            "Score": float(line[1][1]) if isinstance(line[1], list) and len(line[1]) >= 2 else 0.0
-                        }
-                        resMapList.append(resMap)
-                    else:
-                        print(f"警告: line[0]结构异常: {line}")
-                else:
-                    print(f"警告: line结构异常: {line}")
+            resMap = {
+                "Coordinate": coord,
+                "Words": text,
+                "Score": score
+            }
+            print("score:", score)
+            print(text)
+            resMapList.append(resMap)
 
     print(f"识别结果数: {len(resMapList)}")
     return resMapList

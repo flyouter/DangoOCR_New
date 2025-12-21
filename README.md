@@ -61,7 +61,7 @@ uv pip install https://paddle-qa.bj.bcebos.com/paddle-pipeline/Develop-TagBuild-
 
 ## 注意事项
 
-- 由于团子翻译器最新版代码未开源，本项目固定使用 **43623** 端口
+- 由于团子翻译器最新版代码未开源，不知道为啥，本项目启动时会被固定使用 **6666** 端口
 - GPU 版本需要正确安装 NVIDIA 驱动
 - 模型文件较大，首次启动可能需要较长时间
 
