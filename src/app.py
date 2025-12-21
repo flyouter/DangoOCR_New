@@ -32,7 +32,7 @@ def create_ocr_instance(lang, det_model_name, rec_model_name):
     )
 
 # 创建各个语言的OCR实例
-japOcr = create_ocr_instance("japan", "PP-OCRv5_server_det", "PP-OCRv5_server_rec")
+japOcr = create_ocr_instance("japan", "PP-OCRv5_server_det", "PP-OCRv5_mobile_rec")
 engOcr = create_ocr_instance("en", "PP-OCRv5_server_det", "PP-OCRv5_server_rec")
 korOcr = create_ocr_instance("korean", "PP-OCRv5_server_det", "korean_PP-OCRv5_mobile_rec")
 ruOcr = create_ocr_instance("ru", "PP-OCRv5_server_det", "eslav_PP-OCRv5_mobile_rec")
