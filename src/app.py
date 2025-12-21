@@ -1,4 +1,5 @@
 import argparse
+import os
 import uuid
 from traceback import print_exc
 
@@ -7,38 +8,35 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from paddleocr import PaddleOCR
 
-japOcr = PaddleOCR(text_detection_model_dir="../models/PP-OCRv5_server_det",
-                   text_recognition_model_dir="../models/PP-OCRv5_server_rec",
-                   text_recognition_model_name="PP-OCRv5_server_rec",
-                   text_detection_model_name="PP-OCRv5_server_det",
-                   lang="japan",
-                   enable_mkldnn=True)
+def create_ocr_instance(lang, det_model_name, rec_model_name):
+    """
+    创建OCR实例，如果模型目录不存在则自动下载到models目录
+    """
+    # 定义模型目录路径
+    base_model_dir = "../models"
+    det_model_dir = os.path.join(base_model_dir, det_model_name)
+    rec_model_dir = os.path.join(base_model_dir, rec_model_name)
 
-engOcr = PaddleOCR(text_detection_model_dir="../models/PP-OCRv5_server_det",
-                   text_recognition_model_dir="../models/PP-OCRv5_server_rec",
-                   text_recognition_model_name="PP-OCRv5_server_rec",
-                   text_detection_model_name="PP-OCRv5_server_det",
-                   lang="en",
-                   enable_mkldnn=True)
+    # 模型目录存在，使用本地模型
+    print(f"使用本地模型: {det_model_dir}, {rec_model_dir}")
+    return PaddleOCR(
+        text_detection_model_dir=det_model_dir,
+        text_recognition_model_dir=rec_model_dir,
+        text_recognition_model_name=rec_model_name,
+        text_detection_model_name=det_model_name,
+        use_doc_orientation_classify=False,
+        use_doc_unwarping=False,
+        use_textline_orientation=False,
+        lang=lang,
+        enable_mkldnn=True
+    )
 
-korOcr = PaddleOCR(text_detection_model_dir="../models/PP-OCRv5_server_det",
-                   text_recognition_model_dir="../models/korean_PP-OCRv5_mobile_rec",
-                   text_recognition_model_name="korean_PP-OCRv5_mobile_rec",
-                   text_detection_model_name="PP-OCRv5_server_det",
-                   lang="korean",
-                   enable_mkldnn=True)
-ruOcr = PaddleOCR(text_detection_model_dir="../models/PP-OCRv5_server_det",
-                  text_recognition_model_dir="../models/eslav_PP-OCRv5_mobile_rec",
-                  text_recognition_model_name="eslav_PP-OCRv5_mobile_rec",
-                  text_detection_model_name="PP-OCRv5_server_det",
-                  lang="ru",
-                  enable_mkldnn=True)
-zhOcr = PaddleOCR(text_detection_model_dir="../models/PP-OCRv5_server_det",
-                  text_recognition_model_dir="../models/PP-OCRv5_server_rec",
-                  text_recognition_model_name="PP-OCRv5_server_rec",
-                  text_detection_model_name="PP-OCRv5_server_det",
-                  lang="ch",
-                  enable_mkldnn=True)
+# 创建各个语言的OCR实例
+japOcr = create_ocr_instance("japan", "PP-OCRv5_server_det", "PP-OCRv5_server_rec")
+engOcr = create_ocr_instance("en", "PP-OCRv5_server_det", "PP-OCRv5_server_rec")
+korOcr = create_ocr_instance("korean", "PP-OCRv5_server_det", "korean_PP-OCRv5_mobile_rec")
+ruOcr = create_ocr_instance("ru", "PP-OCRv5_server_det", "eslav_PP-OCRv5_mobile_rec")
+zhOcr = create_ocr_instance("ch", "PP-OCRv5_server_det", "PP-OCRv5_server_rec")
 
 app = FastAPI()
 
