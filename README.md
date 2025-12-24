@@ -51,7 +51,7 @@ uv pip install https://paddle-qa.bj.bcebos.com/paddle-pipeline/Develop-TagBuild-
 ### 2. 打包应用
 
 ```shell
-.\.venv_win\Scripts\python.exe package.py --file .\src\app.py --nvidia --name "startOCR" --icon .\ico\logo.ico
+.\.venv_win\Scripts\python.exe .\startOCR.spec
 ```
 
 ### 3. 部署到团子翻译器
