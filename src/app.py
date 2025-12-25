@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import argparse
 import os
 import sys
@@ -209,13 +210,8 @@ def ocrProcess(imgPath, language):
                 "Words": text,
                 "Score": score
             }
-            print("score:", score)
-            try:
-                print(text)
-            except UnicodeEncodeError:
-                # 处理编码问题，将无法编码的字符替换
-                safe_text = text.encode('utf-8', errors='replace').decode('utf-8')
-                print(safe_text)
+            # print("score:", score)
+            # print(text)
             resMapList.append(resMap)
 
     print(f"识别结果数: {len(resMapList)}")
@@ -262,7 +258,5 @@ if __name__ == "__main__":
 
     host = args.host
     port = args.port
-    # 设置系统编码为UTF-8
-    os.environ['PYTHONIOENCODING'] = 'utf-8'
     print("监听：http://%s:%d/ocr/api" % (host, port))
     uvicorn.run(app, host=host, port=port)
